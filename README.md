@@ -7,7 +7,11 @@ Le projet est basé sur un tutoriel YouTube, avec des fonctionnalités suppléme
 Tutoriel suivi :
 https://www.youtube.com/watch?v=AY9MnQ4x3zk
 
-![Gameplay GIF optionnel]
+![Gameplay]
+
+<p align="center">
+  <img src=gameplay.gif" width="600">
+</p>
 
 # Sommaire
 

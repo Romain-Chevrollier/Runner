@@ -18,6 +18,7 @@ https://www.youtube.com/watch?v=AY9MnQ4x3zk
 - [Fonctionnalités](#fonctionnalités)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Structure du projet](#structure-du-projet)
 
 # Fonctionnalités
 

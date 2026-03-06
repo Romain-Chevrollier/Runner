@@ -103,7 +103,8 @@ class RunnerEnv(gym.Env):
         self.spawn_interval = 60  # frames
         self.shoot_cooldown = 120
         self.clock = pygame.time.Clock()
-        self.fps=120
+        self.fps=60
+        self.score = 0
         self.action_space = spaces.Discrete(3)
         self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(10,), dtype=np.float32)
 
@@ -124,7 +125,8 @@ class RunnerEnv(gym.Env):
         self.done = False
         self.frame_count = 0
         self.last_shot_frame = 0
-        return self.get_state(), {}
+        info = {"score": 0}
+        return self.get_state(), info
     
     def _apply_action(self, action):
         # 0 = rien
@@ -242,7 +244,9 @@ class RunnerEnv(gym.Env):
 
         if self.done: reward = -10
         if self.render_mode: self.render(self.screen)
-        return self.get_state(), reward, self.done, False, {}
+        self.score += reward
+        info = {"score": self.score}
+        return self.get_state(), reward, self.done, False, info
 
     def render(self, screen):
         if not self.render_mode:

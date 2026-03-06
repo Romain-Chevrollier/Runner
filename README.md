@@ -63,7 +63,6 @@ https://www.youtube.com/watch?v=AY9MnQ4x3zk
 | Événement | Reward |
 |---|---|
 | Survie par step | +0.1 |
-| Kill ennemi | +5 |
 | Mort | -5 |
 
 # Installation
@@ -83,28 +82,34 @@ pip install pygame stable-baselines3
 
 ## Jouer manuellement
 ```bash
-python main.py
+python main.py play --manual
 ```
 
 ## Entraîner l'agent IA
 ```bash
 # Entraînement par défaut (100k steps)
-python train_runner.py train
+python main.py train
 
 # Entraînement personnalisé
-python train_runner.py train --timesteps 2000000
+python main.py train --timesteps 2000000
 
 # Reprendre un entraînement existant
-python train_runner.py train --timesteps 1000000 --continue-from runner_model
+python main.py train --timesteps 1000000 --continue-from runner_model
 
 # Entraînement avec rendu visuel
-python train_runner.py train --timesteps 500000 --render
+python main.py train --timesteps 500000 --render
 ```
 > Note : Bon résultat à partir de 2M timesteps
 ## Regarder l'agent jouer
 ```bash
-python train_runner.py play
-python train_runner.py play --model runner_model --episodes 10
+# Regarder le runner_model.zip jouer 1 episode
+python main.py play
+
+# Regarder le runner_model jouer 10 episode
+python main.py play --model runner_model --episodes 10
+
+# runner_model.zip joue 1 episode sans le render (plus rapide)
+python main.py play --no-render 
 ```
 
 ## Contrôles (mode manuel)

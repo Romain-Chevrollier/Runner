@@ -45,13 +45,13 @@ def train_runner(timesteps=100000, render=False, continue_from=None):
     env.close()
     return model
 
-def play_trained_model(model_path="snake_model", episodes=5):
+def play_trained_model(model_path="snake_model", episodes=1, render=True):
     """Watch the trained model play"""
 
     print(f"Loading model: {model_path}")
 
     # Create environment with rendering
-    env = RunnerEnv(render_mode=True)
+    env = RunnerEnv(render_mode=render)
 
     # Load model
     model = PPO.load(model_path, env=env)

@@ -1,5 +1,5 @@
 from ai_train.train_runner import train_runner, play_trained_model
-import manual_game.manual_gameplay
+from manual_game.manual_gameplay import run_game
 import argparse 
 
 def main():
@@ -13,11 +13,11 @@ def main():
     train_parser.add_argument("--continue_train", type=str, default=None, metavar="MODEL_PATH")
 
     # Play
-    play_parser = subparsers.add_parser("play", help="Watch trained model")
-    play_parser.add_argument("--model", type=str, default="runner_model")
-    play_parser.add_argument("--episodes", type=int, default=5)
-
-    play_parser = subparsers.add_parser("manual", help="Play the game")
+    play_parser = subparsers.add_parser("play", help="Regarder le model jouer")
+    play_parser.add_argument("--model", type=str, default="runner_model", help="Changer le nom du model à utiliser")
+    play_parser.add_argument("--episodes", type=int, default=1, help="Changer le nombre d'épisode")
+    play_parser.add_argument("--no-render", action="store_true", help="Désactiver le rendu (plus rapide)")
+    play_parser.add_argument("--manual", action="store_true", help="Jouer manuellement")
 
     args = parser.parse_args()
 
@@ -28,10 +28,10 @@ def main():
             continue_from=args.continue_from if args.command else None
         )
     elif args.command == "play":
-        play_trained_model(args.model, args.episodes)
-
-    elif args.command == 'manual':
-        manual_game.manual_gameplay
+        if args.manual:
+            run_game()
+        else:
+            play_trained_model(args.model, args.episodes, render= not args.no_render)
 
 if __name__ == "__main__":
     main()

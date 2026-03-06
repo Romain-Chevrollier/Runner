@@ -89,7 +89,8 @@ class projectile(pygame.sprite.Sprite):
 
 def display_score(kills):
     current_time = int(pygame.time.get_ticks()/1000) - start_time
-    score = current_time + kills
+    # score = current_time + kills
+    score = current_time
     score_surface = test_font.render(f'Score : {score}', False, (64,64,64))
     score_rectangle = score_surface.get_rect(center=(400,50))
     screen.blit(score_surface, score_rectangle)
@@ -108,119 +109,120 @@ def collision_projectile_obastacle(projectile_group, obstacle_group):
     return(len(collisions))
 
 
+def run_game():
+    global start_time, test_font, screen, player, obstacle_group, projectile_group
+    pygame.init()
+    screen = pygame.display.set_mode((800, 400))
+    pygame.display.set_caption('Runner')
+    clock = pygame.time.Clock()
+    test_font = pygame.font.Font('assets/font/Pixeltype.ttf', 50)
+    game_active = False
+    start_time = 0
+    score = 0
+    kills = 0
+    last_shot_time = 0
+    shoot_cooldown = 2000
 
-pygame.init()
-screen = pygame.display.set_mode((800, 400))
-pygame.display.set_caption('Runner')
-clock = pygame.time.Clock()
-test_font = pygame.font.Font('assets/font/Pixeltype.ttf', 50)
-game_active = False
-start_time = 0
-score = 0
-kills = 0
-last_shot_time = 0
-shoot_cooldown = 2000
+    player=pygame.sprite.GroupSingle()
+    player.add(Player())
 
-player=pygame.sprite.GroupSingle()
-player.add(Player())
+    obstacle_group = pygame.sprite.Group()
 
-obstacle_group = pygame.sprite.Group()
+    projectile_group = pygame.sprite.Group()
 
-projectile_group = pygame.sprite.Group()
+    sky_surface = pygame.image.load('assets/graphics/Sky.png').convert()
+    ground_surface = pygame.image.load('assets/graphics/ground.png').convert()
 
-sky_surface = pygame.image.load('assets/graphics/Sky.png').convert()
-ground_surface = pygame.image.load('assets/graphics/ground.png').convert()
+    cooldown_bar15 = pygame.image.load('assets/graphics/cooldown_bar/Health bar15.png').convert_alpha()
+    cooldown_bar0 = pygame.image.load('assets/graphics/cooldown_bar/Health bar0.png').convert_alpha()
+    cooldown_bar2 = pygame.image.load('assets/graphics/cooldown_bar/Health bar2.png').convert_alpha()
+    cooldown_bar4 = pygame.image.load('assets/graphics/cooldown_bar/Health bar4.png').convert_alpha()
+    cooldown_bar6 = pygame.image.load('assets/graphics/cooldown_bar/Health bar6.png').convert_alpha()
+    cooldown_bar8 = pygame.image.load('assets/graphics/cooldown_bar/Health bar8.png').convert_alpha()
+    cooldown_bar10 = pygame.image.load('assets/graphics/cooldown_bar/Health bar10.png').convert_alpha()
+    cooldown_bar12 = pygame.image.load('assets/graphics/cooldown_bar/Health bar12.png').convert_alpha()
+    cooldown_bar14 = pygame.image.load('assets/graphics/cooldown_bar/Health bar14.png').convert_alpha()
+    cooldown_bar= [cooldown_bar15, cooldown_bar0, cooldown_bar2, cooldown_bar4, cooldown_bar6, cooldown_bar8, cooldown_bar10, cooldown_bar12, cooldown_bar14]
+    cooldown_index = 0
 
-cooldown_bar15 = pygame.image.load('assets/graphics/cooldown_bar/Health bar15.png').convert_alpha()
-cooldown_bar0 = pygame.image.load('assets/graphics/cooldown_bar/Health bar0.png').convert_alpha()
-cooldown_bar2 = pygame.image.load('assets/graphics/cooldown_bar/Health bar2.png').convert_alpha()
-cooldown_bar4 = pygame.image.load('assets/graphics/cooldown_bar/Health bar4.png').convert_alpha()
-cooldown_bar6 = pygame.image.load('assets/graphics/cooldown_bar/Health bar6.png').convert_alpha()
-cooldown_bar8 = pygame.image.load('assets/graphics/cooldown_bar/Health bar8.png').convert_alpha()
-cooldown_bar10 = pygame.image.load('assets/graphics/cooldown_bar/Health bar10.png').convert_alpha()
-cooldown_bar12 = pygame.image.load('assets/graphics/cooldown_bar/Health bar12.png').convert_alpha()
-cooldown_bar14 = pygame.image.load('assets/graphics/cooldown_bar/Health bar14.png').convert_alpha()
-cooldown_bar= [cooldown_bar15, cooldown_bar0, cooldown_bar2, cooldown_bar4, cooldown_bar6, cooldown_bar8, cooldown_bar10, cooldown_bar12, cooldown_bar14]
-cooldown_index = 0
+    player_stand = pygame.image.load('assets/graphics/player/player_stand.png').convert_alpha()
+    player_stand = pygame.transform.rotozoom(player_stand,0,2)
+    player_stand_rect = player_stand.get_rect(center = (400,200))
 
-player_stand = pygame.image.load('assets/graphics/player/player_stand.png').convert_alpha()
-player_stand = pygame.transform.rotozoom(player_stand,0,2)
-player_stand_rect = player_stand.get_rect(center = (400,200))
+    game_title_surface = test_font.render('Runner', False, (111,196,169))
+    game_title_rectangle = game_title_surface.get_rect(center=(400,80))
 
-game_title_surface = test_font.render('Runner', False, (111,196,169))
-game_title_rectangle = game_title_surface.get_rect(center=(400,80))
+    game_message = test_font.render('Press space to run', False, (111,196,169))
+    game_message_rectangle = game_message.get_rect(center=(400,330))
 
-game_message = test_font.render('Press space to run', False, (111,196,169))
-game_message_rectangle = game_message.get_rect(center=(400,330))
+    obstacle_timer = pygame.USEREVENT + 1 
+    pygame.time.set_timer(obstacle_timer, 1000)
 
-obstacle_timer = pygame.USEREVENT + 1 
-pygame.time.set_timer(obstacle_timer, 1000)
-
-cooldown_bar_timer = pygame.USEREVENT +2
+    cooldown_bar_timer = pygame.USEREVENT +2
 
 
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            if game_active:
+                if event.type == obstacle_timer:
+                        obstacle_group.add(Obstacle(choice(['fly', 'snail', 'snail', 'snail'])))
+        
+                if event.type == pygame.MOUSEBUTTONUP:
+                    current_time = pygame.time.get_ticks()
+                    if current_time - last_shot_time >= shoot_cooldown:
+                        last_shot_time = current_time
+                        cooldown_index = 1
+                        pygame.time.set_timer(cooldown_bar_timer, 250, 8)
+                        projectile_group.add(projectile(player.sprite.rect.midright[0], player.sprite.rect.midright[1]))
+
+                if event.type == cooldown_bar_timer:
+                    cooldown_index +=1
+                    if cooldown_index > 8: cooldown_index = 0
+
+
+            else: 
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    game_active = True
+                    start_time = int(pygame.time.get_ticks()/1000)
+
 
         if game_active:
-            if event.type == obstacle_timer:
-                    obstacle_group.add(Obstacle(choice(['fly', 'snail', 'snail', 'snail'])))
-    
-            if event.type == pygame.MOUSEBUTTONUP:
-                current_time = pygame.time.get_ticks()
-                if current_time - last_shot_time >= shoot_cooldown:
-                    last_shot_time = current_time
-                    cooldown_index = 1
-                    pygame.time.set_timer(cooldown_bar_timer, 250, 8)
-                    projectile_group.add(projectile(player.sprite.rect.midright[0], player.sprite.rect.midright[1]))
+            screen.blit(sky_surface,(0,0))
+            screen.blit(ground_surface,(0,300))
+            screen.blit(cooldown_bar[cooldown_index],(10,300))
 
-            if event.type == cooldown_bar_timer:
-                cooldown_index +=1
-                if cooldown_index > 8: cooldown_index = 0
+            score = display_score(kills)
 
+            player.draw(screen)
+            player.update()
 
-        else: 
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                game_active = True
-                start_time = int(pygame.time.get_ticks()/1000)
+            obstacle_group.draw(screen)
+            obstacle_group.update()
 
+            projectile_group.draw(screen)
+            projectile_group.update()
 
-    if game_active:
-        screen.blit(sky_surface,(0,0))
-        screen.blit(ground_surface,(0,300))
-        screen.blit(cooldown_bar[cooldown_index],(10,300))
+            game_active = collision_player_obstacle()
 
-        score = display_score(kills)
-
-        player.draw(screen)
-        player.update()
-
-        obstacle_group.draw(screen)
-        obstacle_group.update()
-
-        projectile_group.draw(screen)
-        projectile_group.update()
-
-        game_active = collision_player_obstacle()
- 
-        kills += collision_projectile_obastacle(projectile_group, obstacle_group)
-        
-    else:
-        screen.fill((94,129,162))
-        screen.blit(player_stand, player_stand_rect)
-        screen.blit(game_title_surface, game_title_rectangle)
-
-        score_message = test_font.render(f'Your score : {score}',False, (111,196,169))
-        score_message_rectangle = score_message.get_rect(center=(400,330))
-        player_gravity=0
-        if score != 0:
-            screen.blit(score_message, score_message_rectangle)
+            kills += collision_projectile_obastacle(projectile_group, obstacle_group)
+            
         else:
-            screen.blit(game_message, game_message_rectangle)
+            screen.fill((94,129,162))
+            screen.blit(player_stand, player_stand_rect)
+            screen.blit(game_title_surface, game_title_rectangle)
 
-    pygame.display.update()
-    clock.tick(60)
+            score_message = test_font.render(f'Your score : {score}',False, (111,196,169))
+            score_message_rectangle = score_message.get_rect(center=(400,330))
+            player_gravity=0
+            if score != 0:
+                screen.blit(score_message, score_message_rectangle)
+            else:
+                screen.blit(game_message, game_message_rectangle)
+
+        pygame.display.update()
+        clock.tick(60)
 
